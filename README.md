@@ -11,43 +11,32 @@ many others.
 
 ## Chip in!
 
-### ``pkgbuild`` template
+### Templates
 
 Below there is an example of a ``pkgbuild`` file.
 
-```sh
-# vim: set filetype=sh :
+```ini
 Name="Fubá"
 Vendor="Pindorama"
 Description="Fubá flour-based utilities."
 Version="0.0"
-Archive_name="fuba.$Version.tar.xz"
 Depends_on=("base/kernel-headers", "base/LibC")
 Maintainer="Barão de Mauá"
 Hotline="irineu.evangelista@correios.gov.br"
-
-Destdir="/usr/tmp/fuba-$Version"
-
-unarchive() {
-	c -cd "$Archive_name" | tar -xvf - -C "$OBJDIR"
-}
-
-configure() {
-	./configure --prefix=/usr \
-		--libdir=/lib \
-		--pkgconfigdir=/usr/share/lib/pkgconfig
-}
-
-post_install() { return 0; }
-
-build() {
-	gmake -j$(nproc) \
-	&& DESTDIR="$Destdir" gmake install
-}
 ```
 
-All the functions defined above will be run by a script, it's not meant to be
-called from ``build()`` anymore.
+```sh
+# vim: set filetype=sh :
+c -cd "fuba.$Version.tar.xz" | tar -xvf - -C "$OBJDIR"
+
+cd "$OBJDIR/fuba-$Version"
+./configure --prefix=/usr \
+	--libdir=/lib \
+	--pkgconfigdir=/usr/share/lib/pkgconfig
+
+gmake -j$(nproc) \
+	&& DESTDIR="$Destdir" gmake install
+```
 
 These are the functions currently implemented and ready to use on pkgbuilds:
 
@@ -58,9 +47,7 @@ These are the functions currently implemented and ready to use on pkgbuilds:
 | ``lines`` | Counts the quantity of lines, like ``wc -l``. |
 | ``n`` | Counts elements. It's a workaround for the ``#``<br>macro present in GNU Broken-Again Shell 4.3, but<br>you can use it instead the aforesaid macro in<br>any shell that support arrays. |
 | ``nproc`` | Counts processors in the machine, multiplatform (can<br>run on \*BSD, Darwin (MacOS), Linux and SunOS); |
-| ``printerr`` | Prints messages to the standard error output |
-| ``pushd`` | Push a directory onto a stack. |
-| ``popd`` | "Pop" (remove) an directory from the stack and<br>changes into the last. |
+| ``log`` | Prints messages to the standard error output |
 | ``realpath`` | Gets the real path to files. |
 | ``timeout`` | Runs a commmand with time limit. |
 
