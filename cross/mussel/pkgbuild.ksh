@@ -4,12 +4,10 @@ c -cd "dev/$Version.tar.gz" | tar -xvf - -C "$OBJDIR"
 
 cd "$OBJDIR/${Name}-${Version}"
 mussel_directory="$(pwd)"
-mussel_PREFIX="$mussel_directory/toolchain"
-mussel_SYSROOT="$mussel_directory/sysroot"
+mussel_TOOLCHAIN="$mussel_directory/toolchain"
 ./check
 ./mussel "$(uname -m)" -l -o -k -p
-(cd "$mussel_SYSROOT"; tar -cf - . | tar -xf - -C "$Destdir") \
-&& (cd "$mussel_PREFIX"; tar -cf - . | tar -xf - -C "$Destdir")
+(cd "$mussel_TOOLCHAIN"; tar -cf - . | tar -xf - -C "$Destdir") 
 
 mv $Destdir/usr/lib/* "$Destdir/lib/"
 mv  $Destdir/usr/include/* "$Destdir/include/"
