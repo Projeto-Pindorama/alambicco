@@ -144,6 +144,9 @@ if [[ $stage =~ (first|second) ]]; then
 	COFF+='-DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF '
 	COFF+='-DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBPFM=OFF '
 	COFF+='-DLLVM_INCLUDE_BENCHMARKS=OFF '
+else # final or clang rebuild
+	CXXFLAGS="$CFLAGS" # ... from machine.ini
+	LDFLAGS="$LDFLAGS"
 fi
 
 cmake -G 'Unix Makefiles' -B build -S llvm -Wno-dev \
