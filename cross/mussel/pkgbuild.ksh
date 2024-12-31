@@ -5,7 +5,7 @@ cd "$OBJDIR/${Name}-${Version}"
 mussel_directory="$(pwd)"
 mussel_TOOLCHAIN="$mussel_directory/toolchain"
 ./check
-./mussel "$(uname -m)" -l -o -k -p
+./mussel $MARCH -T $CROSS_VENDOR -l -o -k -p
 (cd "$mussel_TOOLCHAIN"; tar -cf - . | tar -xf - -C "$Destdir") 
 "$Destdir/bin/${TARGET_TUPLE}-gcc" -dumpspecs \
 	| sed 's@/lib/ld-musl@/llvmtools/lib/ld-musl@g' \
