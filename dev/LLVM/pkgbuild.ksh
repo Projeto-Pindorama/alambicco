@@ -1,6 +1,5 @@
 # vim: set filetype=sh :
 
-set -x
 # Set if we're building the final LLVM (for /usr/ccs), the second
 # stage (for /llvmtools) or the first stage (/cgnutools).
 case "x${Destdir##*/}" in
@@ -30,7 +29,7 @@ if [[ $stage =~ (first|second) ]]; then
 	cat "$trash/LLVM-test-linux-ld.c" > ./clang/test/Driver/linux-ld.c
 	# Built llvm-tblgen will need libstdc++.so.6 & libgcc_s.so.1.
 	# Set the rpath
-	CFLAGS='-fPIC -I/cgnutools/include -Wl,-rpath=/cgnutools/lib'
+	CFLAGS='-O0 -g0 -pipe -fPIC -I/cgnutools/include -Wl,-rpath=/cgnutools/lib'
 	CXXFLAGS="$CFLAGS"
 	LDFLAGS='-L/cgnutools/lib -L/llvmtools/lib'
 
@@ -135,7 +134,7 @@ if [[ $stage =~ (first|second) ]]; then
 		CLLVM+='-DLLVM_ENABLE_LIBCXX=ON '
 		CLLVM+='-DLLVM_ENABLE_LLD=ON '
 		CLLVM+='-DZLIB_INCLUDE_DIR=/llvmtools/include '
-		CLLVM+'-DZLIB_LIBRARY_RELEASE=/llvmtools/lib/libz.so ' ;;
+		CLLVM+='-DZLIB_LIBRARY_RELEASE=/llvmtools/lib/libz.so ' ;;
 	esac
 
 	# Turn off LLVM options
@@ -148,8 +147,9 @@ else # final or clang rebuild
 	CXXFLAGS="$CFLAGS" # ... from machine.ini
 	LDFLAGS="$LDFLAGS"
 fi
+export CFLAGS CXXFLAGS LDFLAGS
 
-cmake -G 'Unix Makefiles' -B build -S llvm -Wno-dev \
+cmake -G Ninja -B build -S llvm -Wno-dev \
       -DCMAKE_BUILD_TYPE=Release \
       -DLLVM_ENABLE_RUNTIMES='compiler-rt;libunwind;libcxx;libcxxabi' \
       -DLLVM_ENABLE_PROJECTS='clang;lld' \
@@ -157,16 +157,18 @@ cmake -G 'Unix Makefiles' -B build -S llvm -Wno-dev \
       -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
       -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" $CT $CTG $CP $CRT $CLG $CLCPP \
       $CLCPPA $CUW $CLLVM $COFF
-gmake -j$(nproc) -C build
-#DESTDIR="${Destdir%/*}" cmake --install build --strip
-DESTDIR="${Destdir%/*}" gmake -C build install
+ninja -C build
+DESTDIR="${Destdir%/*}" cmake --install build --strip
 
-(cd "$Destdir"; (cd bin; ln clang-17 cc; ln ldd ld))
+(cd "$Destdir"; (cd bin; ln clang-17 cc; ln ld.lld ld))
 case "$stage" in
 	'first')
-	mv /cgnutools/bin/ld{,-nouse}
-	mv /cgnutools/lib/gcc{,-nouse}
+	[ -e /cgnutools/bin/ld ] && mv /cgnutools/bin/ld{,-nouse}
+	[ -e /cgnutools/bin/gcc ] && mv /cgnutools/lib/gcc{,-nouse}
 	printf  > "$Destdir/bin/${TARGET_TUPLE}.cfg" \
 	'-L/cgnutools/lib\n-nostdinc++\n-I/cgnutools/include/c++/v1\n-I/llvmtools/include\n' ;;
+	'second')
+	mkdir "$Destdir/usr"
+	(cd "$Destdir/usr"; ln -s ../include .)
+	;;
 esac
-
