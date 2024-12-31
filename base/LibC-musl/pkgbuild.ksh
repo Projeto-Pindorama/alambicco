@@ -1,5 +1,4 @@
 # vim: set filetype=sh :
-
 xtools=true
 case "x${Destdir##*/}" in
 	'x') xtools=false ;;
@@ -14,7 +13,7 @@ if ! $xtools; then
 		patch -Np1 -i "$patch_dir/musl-$Version/$patch"
 	done
 
-	export LDFLAGS="-Wl,-soname,libc.musl-$(uname -m).so.1"
+	LDFLAGS="-Wl,-soname,libc.musl-$MUSL_ARCH.so.1"
 
 	configure_opts=( "--prefix=/usr"
 		"--sysconfdir=/etc"
@@ -22,6 +21,7 @@ if ! $xtools; then
 		"--mandir=/usr/share/man"
 		"--infodir=/usr/share/info"
 		"--disable-gcc-wrapper" )
+	export LDFLAGS
 else
 	configure_opts=( "CROSS_COMPILE=${TARGET_TUPLE}-"
 		"--prefix=/"
@@ -35,21 +35,21 @@ DESTDIR="$Destdir" gmake install
 
 ( cd "$Destdir"
 if $xtools; then
-	rm "$Destdir/lib/ld-musl-$(uname -m).so.1"
-	ln -s libc.so "$Destdir/lib/ld-musl-$(uname -m).so.1"	
+	rm "$Destdir/lib/ld-musl-$MUSL_ARCH.so.1"
+	ln -s libc.so "$Destdir/lib/ld-musl-$MUSL_ARCH.so.1"	
 	mkdir "$Destdir/etc/" "$Destdir/bin/"
 	ln -s '../lib/libc.so' "$Destdir/bin/ldd"
 	printf '/llvmtools/lib\n/llvmtools/%s/lib\n/llvmtools/lib/%s\n' \
-		"$TARGET_TUPLE" "$TARGET_TUPLE" > "$Destdir/etc/ld-musl-$(uname -m).path"
+		"$TARGET_TUPLE" "$TARGET_TUPLE" > "$Destdir/etc/ld-musl-$MUSL_ARCH.path"
 	"/cgnutools/bin/${TARGET_TUPLE}-gcc" -dumpspecs | sed 's@/lib/ld-musl@/llvmtools/lib/ld-musl@g' \
 		> "/cgnutools/lib/gcc/${TARGET_TUPLE}/$(/cgnutools/bin/${TARGET_TUPLE}-gcc --version \
 		| nawk '/.*gcc \(mussel\).*/ { print $3 }')/specs"
 else
-	ln -s "./lib/ld-musl-$(uname -m).so.1" ./usr/lib/libc.so
-	ln "./lib/ld-musl-$(uname -m).so.1" \
-		"./lib/libc.musl-$(uname -m).so.1"
-	ln "./lib/ld-musl-$(uname -m).so.1" ./bin/ldd
+	ln -s "./lib/ld-musl-$MUSL_ARCH.so.1" ./usr/lib/libc.so
+	ln "./lib/ld-musl-$MUSL_ARCH.so.1" \
+		"./lib/libc.musl-$MUSL_ARCH.so.1"
+	ln "./lib/ld-musl-$MUSL_ARCH.so.1" ./bin/ldd
 
 	printf '/lib\n/usr/lib' \
-		> "./etc/ld-musl-$(uname -m).path"
+		> "./etc/ld-musl-$MUSL_ARCH.path"
 fi )
