@@ -21,7 +21,7 @@ CT+="-DCMAKE_AR=/cgnutools/bin/${TARGET_TUPLE}-ar "
 CT+="-DCMAKE_NM=/cgnutools/bin/${TARGET_TUPLE}-nm "
 CT+="-DCMAKE_RANLIB=/cgnutools/bin/${TARGET_TUPLE}-ranlib "
 
-cmake -G 'Unix Makefiles' -B build -S libunwind -Wno-dev \
+cmake -G Ninja -B build -S libunwind -Wno-dev \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=/cgnutools \
       -DCMAKE_INSTALL_OLDINCLUDEDIR=/cgnutools/include \
