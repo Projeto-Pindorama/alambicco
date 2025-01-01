@@ -31,8 +31,8 @@ cmake -G 'Unix Makefiles' -B build -S libunwind -Wno-dev \
       -DLIBUNWIND_ENABLE_CROSS_UNWINDING=ON \
       -DLIBUNWIND_ENABLE_STATIC=OFF \
       -DLIBUNWIND_HIDE_SYMBOLS=ON $CT
-gmake -j$(nproc) -C build unwind
-DESTDIR="${Destdir%/*}" gmake -C build install-unwind-stripped
+ninja -C build unwind
+DESTDIR="${Destdir%/*}" ninja -C build install-unwind-stripped
 
 # Relink back to /llvmtools's lib.C.
 "/cgnutools/bin/${TARGET_TUPLE}-gcc" -dumpspecs | sed 's@/lib/ld-musl@/llvmtools/lib/ld-musl@g' \
