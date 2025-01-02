@@ -5,13 +5,16 @@
 case "x${Destdir##*/}" in
 	'x')
 		LLVM_new_vendor="Copacabana $COPA_VERSION"
-		stage='final' ;;
-	'xllvmtools') 
+		stage='final'
+		;;
+	'xllvmtools')
 		LLVM_new_vendor="Copacabana (llvmtools) $COPA_VERSION"
-		stage='second' ;;
+		stage='second'
+		;;
 	'xcgnutools')
 		LLVM_new_vendor="Copacabana (cgnutools) $COPA_VERSION"
-		stage='first' ;;
+		stage='first'
+		;;
 esac
 
 c -cd "dev/llvm-project-${Version}.src.tar.xz" | tar -xvf - -C "$OBJDIR"
@@ -21,12 +24,12 @@ cd "$OBJDIR/llvm-project-${Version}.src"
 if [[ $stage =~ (first|second) ]]; then
 	# Hack clang(1) from the source to use the dynamic loader
 	# from /llvmtools; also apply changes to the tests.
-	sed > "$trash/LLVM-Linux.cpp" 's@"\(/lib/ld-musl-\)"@"/llvmtools\1"@g' \
+	sed >"$trash/LLVM-Linux.cpp" 's@"\(/lib/ld-musl-\)"@"/llvmtools\1"@g' \
 		./clang/lib/Driver/ToolChains/Linux.cpp
-	cat "$trash/LLVM-Linux.cpp" > ./clang/lib/Driver/ToolChains/Linux.cpp
-	sed > "$trash/LLVM-test-linux-ld.c" 's@"\(/lib/ld-musl-.*\)"@"/llvmtools\1"@g' \
+	cat "$trash/LLVM-Linux.cpp" >./clang/lib/Driver/ToolChains/Linux.cpp
+	sed >"$trash/LLVM-test-linux-ld.c" 's@"\(/lib/ld-musl-.*\)"@"/llvmtools\1"@g' \
 		./clang/test/Driver/linux-ld.c
-	cat "$trash/LLVM-test-linux-ld.c" > ./clang/test/Driver/linux-ld.c
+	cat "$trash/LLVM-test-linux-ld.c" >./clang/test/Driver/linux-ld.c
 	# Built llvm-tblgen will need libstdc++.so.6 & libgcc_s.so.1.
 	# Set the rpath
 	CFLAGS='-O0 -g0 -pipe -fPIC -I/cgnutools/include -Wl,-rpath=/cgnutools/lib'
@@ -36,20 +39,22 @@ if [[ $stage =~ (first|second) ]]; then
 	# Set the compiler and linker flags...
 	case $stage in
 		'first')
-		CT="-DCMAKE_C_COMPILER=${TARGET_TUPLE}-gcc "
-		CT+="-DCMAKE_CXX_COMPILER=${TARGET_TUPLE}-g++ "
-		CT+="-DCMAKE_AR=/cgnutools/bin/${TARGET_TUPLE}-ar "
-		CT+="-DCMAKE_NM=/cgnutools/bin/${TARGET_TUPLE}-nm "
-		CT+="-DCMAKE_RANLIB=/cgnutools/bin/${TARGET_TUPLE}-ranlib "
-		CT+='-DCLANG_DEFAULT_LINKER=/cgnutools/bin/ld.lld '
-		CT+="-DGNU_LD_EXECUTABLE=/cgnutools/bin/${COPA_TARGET}-ld.bfd " ;;
+			CT="-DCMAKE_C_COMPILER=${TARGET_TUPLE}-gcc "
+			CT+="-DCMAKE_CXX_COMPILER=${TARGET_TUPLE}-g++ "
+			CT+="-DCMAKE_AR=/cgnutools/bin/${TARGET_TUPLE}-ar "
+			CT+="-DCMAKE_NM=/cgnutools/bin/${TARGET_TUPLE}-nm "
+			CT+="-DCMAKE_RANLIB=/cgnutools/bin/${TARGET_TUPLE}-ranlib "
+			CT+='-DCLANG_DEFAULT_LINKER=/cgnutools/bin/ld.lld '
+			CT+="-DGNU_LD_EXECUTABLE=/cgnutools/bin/${COPA_TARGET}-ld.bfd "
+			;;
 		'second')
-		CT="-DCMAKE_C_COMPILER=${TARGET_TUPLE}-clang "
-		CT+="-DCMAKE_CXX_COMPILER=${TARGET_TUPLE}-clang++ "
-		CT+='-DCMAKE_AR=/cgnutools/bin/llvm-ar '
-		CT+='-DCMAKE_NM=/cgnutools/bin/llvm-nm ' 
-		CT+='-DCMAKE_RANLIB=/cgnutools/bin/llvm-ranlib '
-		CT+='-DCLANG_DEFAULT_LINKER=/llvmtools/bin/ld.lld ' ;;
+			CT="-DCMAKE_C_COMPILER=${TARGET_TUPLE}-clang "
+			CT+="-DCMAKE_CXX_COMPILER=${TARGET_TUPLE}-clang++ "
+			CT+='-DCMAKE_AR=/cgnutools/bin/llvm-ar '
+			CT+='-DCMAKE_NM=/cgnutools/bin/llvm-nm '
+			CT+='-DCMAKE_RANLIB=/cgnutools/bin/llvm-ranlib '
+			CT+='-DCLANG_DEFAULT_LINKER=/llvmtools/bin/ld.lld '
+			;;
 	esac
 
 	# Set the tuples & build target ...
@@ -82,7 +87,7 @@ if [[ $stage =~ (first|second) ]]; then
 		'second')
 			CRT+='-DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON '
 			CRT+='-DCOMPILER_RT_CXX_LIBRARY=libcxx '
-		       	;;
+			;;
 	esac
 
 	# Set options for clang
@@ -115,7 +120,7 @@ if [[ $stage =~ (first|second) ]]; then
 	esac
 
 	# Set options for libunwind
-	CUW='-DLIBUNWIND_INSTALL_HEADERS=ON ' 
+	CUW='-DLIBUNWIND_INSTALL_HEADERS=ON '
 	case $stage in
 		'second') CUW+='-DLIBUNWIND_USE_COMPILER_RT=ON ' ;;
 	esac
@@ -131,10 +136,11 @@ if [[ $stage =~ (first|second) ]]; then
 	CLLVM+='-DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON '
 	case $stage in
 		'second')
-		CLLVM+='-DLLVM_ENABLE_LIBCXX=ON '
-		CLLVM+='-DLLVM_ENABLE_LLD=ON '
-		CLLVM+='-DZLIB_INCLUDE_DIR=/llvmtools/include '
-		CLLVM+='-DZLIB_LIBRARY_RELEASE=/llvmtools/lib/libz.so ' ;;
+			CLLVM+='-DLLVM_ENABLE_LIBCXX=ON '
+			CLLVM+='-DLLVM_ENABLE_LLD=ON '
+			CLLVM+='-DZLIB_INCLUDE_DIR=/llvmtools/include '
+			CLLVM+='-DZLIB_LIBRARY_RELEASE=/llvmtools/lib/libz.so '
+			;;
 	esac
 
 	# Turn off LLVM options
@@ -143,32 +149,51 @@ if [[ $stage =~ (first|second) ]]; then
 	COFF+='-DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF '
 	COFF+='-DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBPFM=OFF '
 	COFF+='-DLLVM_INCLUDE_BENCHMARKS=OFF '
-else # final or clang rebuild
+else                # final or clang rebuild
 	CXXFLAGS="$CFLAGS" # ... from machine.ini
 	LDFLAGS="$LDFLAGS"
 fi
 export CFLAGS CXXFLAGS LDFLAGS
 
 cmake -G Ninja -B build -S llvm -Wno-dev \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DLLVM_ENABLE_RUNTIMES='compiler-rt;libunwind;libcxx;libcxxabi' \
-      -DLLVM_ENABLE_PROJECTS='clang;lld' \
-      -DCLANG_VENDOR="$LLVM_new_vendor" -DLLD_VENDOR="$LLVM_new_vendor" \
-      -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-      -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" $CT $CTG $CP $CRT $CLG $CLCPP \
-      $CLCPPA $CUW $CLLVM $COFF
+	-DCMAKE_BUILD_TYPE=Release \
+	-DLLVM_ENABLE_RUNTIMES='compiler-rt;libunwind;libcxx;libcxxabi' \
+	-DLLVM_ENABLE_PROJECTS='clang;lld' \
+	-DCLANG_VENDOR="$LLVM_new_vendor" -DLLD_VENDOR="$LLVM_new_vendor" \
+	-DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+	-DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" $CT $CTG $CP $CRT $CLG $CLCPP \
+	$CLCPPA $CUW $CLLVM $COFF
 ninja -C build
 DESTDIR="${Destdir%/*}" cmake --install build --strip
 
-(cd "$Destdir"; (cd bin; ln clang-17 cc; ln ld.lld ld))
+(
+	cd "$Destdir"
+	(
+		cd bin
+		ln clang-17 cc
+		ln ld.lld ld
+	)
+)
 case "$stage" in
 	'first')
-	[ -e /cgnutools/bin/ld ] && mv /cgnutools/bin/ld{,-nouse}
-	[ -e /cgnutools/bin/gcc ] && mv /cgnutools/lib/gcc{,-nouse}
-	printf  > "$Destdir/bin/${TARGET_TUPLE}.cfg" \
-	'-L/cgnutools/lib\n-nostdinc++\n-I/cgnutools/include/c++/v1\n-I/llvmtools/include\n' ;;
+		[ -e /cgnutools/bin/ld ] && mv /cgnutools/bin/ld{,-nouse}
+		[ -e /cgnutools/bin/gcc ] && mv /cgnutools/lib/gcc{,-nouse}
+		(
+			cd "$Destdir"
+			(
+				cd bin
+				ln clang-17 ${TARGET_TUPLE}-clang
+				ln clang-17 ${TARGET_TUPLE}-clang++
+			)
+		)
+		printf >"$Destdir/bin/${TARGET_TUPLE}.cfg" \
+			'-L/cgnutools/lib\n-nostdinc++\n-I/cgnutools/include/c++/v1\n-I/llvmtools/include\n'
+		;;
 	'second')
-	mkdir "$Destdir/usr"
-	(cd "$Destdir/usr"; ln -s ../include .)
-	;;
+		mkdir "$Destdir/usr"
+		(
+			cd "$Destdir/usr"
+			ln -s ../include .
+		)
+		;;
 esac
