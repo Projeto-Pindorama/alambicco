@@ -17,7 +17,7 @@ case "x${Destdir##*/}" in
 		;;
 esac
 
-c -cd "dev/llvm-project-${Version}.src.tar.xz" | tar -xvf - -C "$OBJDIR"
+c -cd "dev/llvm-project-${Version}.src.tar.xz" | tar -xf - -C "$OBJDIR"
 cd "$OBJDIR/llvm-project-${Version}.src"
 
 [ -d build ] && rm -rf ./build
@@ -33,7 +33,6 @@ if [[ $stage =~ (first|second) ]]; then
 	# Built llvm-tblgen will need libstdc++.so.6 & libgcc_s.so.1.
 	# Set the rpath
 	CFLAGS='-O0 -g0 -pipe -fPIC -I/cgnutools/include -Wl,-rpath=/cgnutools/lib'
-	CXXFLAGS="$CFLAGS"
 	LDFLAGS='-L/cgnutools/lib -L/llvmtools/lib'
 
 	# Set the compiler and linker flags...
@@ -150,9 +149,9 @@ if [[ $stage =~ (first|second) ]]; then
 	COFF+='-DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBPFM=OFF '
 	COFF+='-DLLVM_INCLUDE_BENCHMARKS=OFF '
 else                # final or clang rebuild
-	CXXFLAGS="$CFLAGS" # ... from machine.ini
 	LDFLAGS="$LDFLAGS"
 fi
+CXXFLAGS="$CFLAGS"
 export CFLAGS CXXFLAGS LDFLAGS
 
 cmake -G Ninja -B build -S llvm -Wno-dev \
@@ -187,7 +186,13 @@ case "$stage" in
 			)
 		)
 		printf >"$Destdir/bin/${TARGET_TUPLE}.cfg" \
-			'-L/cgnutools/lib\n-nostdinc++\n-I/cgnutools/include/c++/v1\n-I/llvmtools/include\n'
+		'-L/cgnutools/lib\n-L/cgnutools/lib/%s\n-nostdinc++\n' \
+			"$TARGET_TUPLE"
+		printf >>"$Destdir/bin/${TARGET_TUPLE}.cfg" \
+		'-I/cgnutools/include/c++/v1\n-I/cgnutools/include/%s/c++/v1\n-I/llvmtools/include\n' \
+			"$TARGET_TUPLE"
+		# Amend /cgnutools' library path to /llvmtools'.
+		echo '/cgnutools/lib' >> "/llvmtools/etc/ld-musl-${MUSL_ARCH}.path"
 		;;
 	'second')
 		mkdir "$Destdir/usr"
