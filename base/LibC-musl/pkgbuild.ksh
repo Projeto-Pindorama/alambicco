@@ -5,7 +5,7 @@ case "x${Destdir##*/}" in
 	*) ;;
 esac
 
-c -cd "musl-$Version.tar.gz" | tar -xvf - -C "$OBJDIR"
+c -cd "musl-$Version.tar.gz" | tar -xf - -C "$OBJDIR"
 
 if ! $xtools; then
 	for patch in 'handle-aux-at_base.patch' \

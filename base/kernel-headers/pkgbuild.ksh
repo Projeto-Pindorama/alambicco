@@ -8,7 +8,7 @@ case "x${Destdir##*/}" in
 	*) ;;
 esac
 Archive_name="linux-$Version.tar.xz"
-c -cd "$Archive_name" | tar -xvf - -C "$OBJDIR"
+c -cd "$Archive_name" | tar -xf - -C "$OBJDIR"
 cd "$OBJDIR/linux-${Version}"
 ARCH=$ARCH gmake headers
 mkdir -p "$Destdir/include"

@@ -5,7 +5,7 @@
 	> "/cgnutools/lib/gcc/${TARGET_TUPLE}/$(/cgnutools/bin/${TARGET_TUPLE}-gcc --version \
 	| nawk '/.*gcc \(mussel\).*/ { print $3 }')/specs"
 
-c -cd "dev/llvm-project-${Version}.src.tar.xz" | tar -xvf - -C "$OBJDIR"
+c -cd "dev/llvm-project-${Version}.src.tar.xz" | tar -xf - -C "$OBJDIR"
 cd "$OBJDIR/llvm-project-${Version}.src"
 
 # Set CFLAGS to generate position-independent code,

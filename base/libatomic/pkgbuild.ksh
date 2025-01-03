@@ -8,7 +8,7 @@ case "x${Destdir##*/}" in
 		Destdir="${Destdir%/*}" ;;
 esac
 
-c -cd "dev/$Version.tar.gz" | tar -xvf - -C "$OBJDIR"
+c -cd "dev/$Version.tar.gz" | tar -xf - -C "$OBJDIR"
 cd "$OBJDIR/libreatomic-$Version"
 if ! $xtools; then
 	CC=$CC

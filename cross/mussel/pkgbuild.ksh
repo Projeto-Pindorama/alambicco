@@ -1,6 +1,6 @@
 # vim: set filetype=sh :
 
-c -cd "dev/$Version.tar.gz" | tar -xvf - -C "$OBJDIR"
+c -cd "dev/$Version.tar.gz" | tar -xf - -C "$OBJDIR"
 cd "$OBJDIR/${Name}-${Version}"
 mussel_directory="$(pwd)"
 mussel_TOOLCHAIN="$mussel_directory/toolchain"

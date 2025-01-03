@@ -8,7 +8,7 @@ case "x${Destdir##*/}" in
 		Destdir="${Destdir%/*}";;
 esac
 
-c -cd "$Version.tar.gz" | tar -xvf - -C "$OBJDIR"
+c -cd "$Version.tar.gz" | tar -xf - -C "$OBJDIR"
 
 cd "$OBJDIR/zlib-ng-$Version"
 CC=${TARGET_TUPLE}-gcc
