@@ -184,6 +184,10 @@ case "$stage" in
 				ln clang-17 ${TARGET_TUPLE}-clang
 				ln clang-17 ${TARGET_TUPLE}-clang++
 			)
+			(
+				cd "lib/${TARGET_TUPLE}"
+				ln lib*.* ../
+			)
 		)
 		printf >"$Destdir/bin/${TARGET_TUPLE}.cfg" \
 		'-L/cgnutools/lib\n-L/cgnutools/lib/%s\n-nostdinc++\n' \
